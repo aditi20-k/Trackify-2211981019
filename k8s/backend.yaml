@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expensetracker-backend
+  labels:
+    app: expensetracker-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: expensetracker-backend
+  template:
+    metadata:
+      labels:
+        app: expensetracker-backend
+    spec:
+      containers:
+        - name: backend
+          image: aditikapoor20/expensetracker-backend:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PORT
+              value: "5000"
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: expensetracker-secrets
+                  key: MONGO_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: expensetracker-secrets
+                  key: JWT_SECRET
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: expensetracker-backend
+  ports:
+    - port: 5000
+      targetPort: 5000
