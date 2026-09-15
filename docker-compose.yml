@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # ==========================================
-  # Backend API Service (Private - Port 5000 exposed internally only)
+  # Backend API Service
   # ==========================================
   backend:
     build:
@@ -10,8 +10,8 @@ services:
       dockerfile: Dockerfile
     container_name: expensetracker_backend
     restart: always
-    expose:
-      - "5000"
+    ports:
+      - "5000:5000"
     env_file:
       - ./server/.env
     environment:
@@ -27,7 +27,7 @@ services:
       - expensetracker_net
 
   # ==========================================
-  # Frontend Service (Public - Nginx on Port 80, proxying /api to backend:5000)
+  # Frontend Service (Nginx on Port 80 & Port 8080)
   # ==========================================
   frontend:
     build:
@@ -39,6 +39,7 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "8080:80"
     depends_on:
       - backend
     networks:
